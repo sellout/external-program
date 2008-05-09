@@ -9,7 +9,7 @@
 (defsystem external-program
   :author "Greg Pfeil <greg@technomadic.org>"
   :licence "LLGPL"
-  :version "0.0.2"
+  :version "0.0.3"
   :components
   ((:module "src"
             :components
