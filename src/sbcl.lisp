@@ -7,10 +7,10 @@
 
 (defmethod run (program args &rest rest)
   (process-status (apply #'sb-ext:run-program
-                         program args :wait t rest)))
+                         program args :search t :wait t rest)))
 
 (defmethod start (program args &rest rest)
-  (apply #'sb-ext:run-program program args :wait nil rest))
+  (apply #'sb-ext:run-program program args :search t :wait nil rest))
 
 (defmethod signal-process (process signal)
   (sb-ext:process-kill process (cdr (assoc signal *signal-mapping*))))
