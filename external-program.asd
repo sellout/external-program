@@ -1,4 +1,4 @@
-;;; Copyright 2006, 2007 Greg Pfeil
+;;; Copyright 2006-2008 Greg Pfeil
 ;;; Distributed under the LLGPL (see LICENSE file)
 
 (defpackage external-program-system
@@ -9,7 +9,7 @@
 (defsystem external-program
   :author "Greg Pfeil <greg@technomadic.org>"
   :licence "LLGPL"
-  :version "0.0.5"
+  :version "0.0.6"
   :components
   ((:module "src"
             :components

@@ -1,4 +1,4 @@
-;;; Copyright 2006, 2007 Greg Pfeil
+;;; Copyright 2006-2008 Greg Pfeil
 ;;; Distributed under the LLGPL (see LICENSE file)
 
 (in-package :external-program)
@@ -19,7 +19,7 @@
                                           :wait t)))
 
 (defmethod start (program args &key pty input if-input-does-not-exist output if-output-exists error if-error-exists status-hook)
-  (let ((direction (cond ((eq input output :stream) :io)
+  (let ((direction (cond ((and (eq input :stream) (eq output :stream)) :io)
                          ((eq input :stream) :input)
                          ((eq output :stream) :output))))
     (if direction

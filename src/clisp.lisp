@@ -1,4 +1,4 @@
-;;; Copyright 2006, 2007 Greg Pfeil
+;;; Copyright 2006-2008 Greg Pfeil
 ;;; Distributed under the LLGPL (see LICENSE file)
 
 (in-package :external-program)
@@ -25,7 +25,7 @@
                        :output (if (eq output t) :terminal output)
                        :if-output-exists if-output-exists
                        :wait nil))
-  (cond ((eq input output :stream)
+  (cond ((and (eq input :stream) (eq output :stream))
          (close primary-stream)
          (make-external-process :in-stream input-stream
                                 :out-stream output-stream))
