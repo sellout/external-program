@@ -22,6 +22,7 @@
   (make-external-process :inputp (eq input :stream)
                          :outputp (eq output :stream)
                          :stream (ext:run-program program args
+                                                  :wait nil
                                                   :input input
                                                   :output output
                                                   :error error)))
