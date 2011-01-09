@@ -3,7 +3,7 @@
 
 (in-package :external-program)
 
-;;;; Documentation at http://www.sbcl.org/manual/Support-For-Unix.html
+;;;; Documentation at http://www.sbcl.org/manual/Running-external-programs.html#Running-external-programs
 
 (defun reformat-env (env)
   "SBCL accepts vars as either (\"FOO=meh\" ...) or ((:foo . \"meh\")
@@ -18,7 +18,7 @@
           (if replace-environment-p
               env
               (append env sb-ext:*current-environment*))))
-  (remove-parameter :replace-environment-p rest)
+  (remf :replace-environment-p rest)
   rest)
 
 (defmethod run (program args &rest rest
