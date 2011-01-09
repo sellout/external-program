@@ -3,7 +3,7 @@
 
 (in-package :external-program)
 
-;;;; Documentation at http://openmcl.clozure.com/Doc/#External_002dProgram-Dictionary
+;;;; Documentation at http://ccl.clozure.com/ccl-documentation.html#External-Program-Dictionary(
 
 (defun stringify-args (args)
   (mapcar (lambda (arg)
@@ -14,14 +14,24 @@
               (pathname              (namestring arg))))
           args))
 
-(defmethod run (program args &rest rest)
-  (rename-parameter :environment :env rest)
-  (process-status (apply #'ccl:run-program
-                         program (stringify-args args) :wait t rest)))
+(defun convert-environment (rest)
+  (remf rest :replace-environment-p)
+  (rename-parameter :environment :env rest))
 
-(defmethod start (program args &rest rest)
-  (rename-parameter :environment :env rest)
-  (apply #'ccl:run-program program (stringify-args args) :wait nil rest))
+(defmethod run
+    (program args &rest rest &key replace-environment-p &allow-other-keys)
+  (when replace-environment-p
+    (warn "REPLACE-ENVIRONMENT-P is not supported on CCL."))
+  (process-status (apply #'ccl:run-program
+                         program (stringify-args args) :wait t
+                         (convert-environment rest))))
+
+(defmethod start
+    (program args &rest rest &key replace-environment-p &allow-other-keys)
+  (when replace-environment-p
+    (warn "REPLACE-ENVIRONMENT-P is not supported on CCL."))
+  (apply #'ccl:run-program
+         program (stringify-args args) :wait nil (convert-environment rest)))
 
 (defmethod signal-process ((process ccl:external-process) signal)
   (ccl:signal-external-process process
