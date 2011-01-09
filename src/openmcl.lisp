@@ -5,18 +5,29 @@
 
 ;;;; Documentation at http://openmcl.clozure.com/Doc/#External_002dProgram-Dictionary
 
+(defun stringify-args (args)
+  (mapcar (lambda (arg)
+            (typecase arg
+              (sequence              (coerce arg 'string))
+              ((or symbol character) (string arg))
+              (number                (format nil "~a" arg))
+              (pathname              (namestring arg))))
+          args))
+
 (defmethod run (program args &rest rest)
   (rename-parameter :environment :env rest)
-  (process-status (apply #'ccl:run-program program args :wait t rest)))
+  (process-status (apply #'ccl:run-program
+                         program (stringify-args args) :wait t rest)))
 
 (defmethod start (program args &rest rest)
   (rename-parameter :environment :env rest)
-  (apply #'ccl:run-program program args :wait nil rest))
+  (apply #'ccl:run-program program (stringify-args args) :wait nil rest))
 
 (defmethod signal-process ((process ccl:external-process) signal)
-  (ccl:signal-external-process process (if (keywordp signal)
-                                           (cdr (assoc signal *signal-mapping*))
-                                           signal)))
+  (ccl:signal-external-process process
+                               (if (keywordp signal)
+                                   (cdr (assoc signal *signal-mapping*))
+                                   signal)))
 
 (defmethod process-id ((process ccl:external-process))
   (ccl:external-process-id process))
