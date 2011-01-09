@@ -162,3 +162,8 @@ the process changes. The function takes the process as an argument.")
     (:bad-system-call . 12)
     (:broken-pipe . 13)
     (:alarm-clock . 14)))
+
+(defun rename-parameter (ep-name impl-name rest)
+  (setf (getf rest impl-name) (getf rest ep-name))
+  (remf rest ep-name)
+  rest)
