@@ -37,7 +37,8 @@
 
 (test should-be-able-to-use-numbers-as-args
   (multiple-value-bind (status code)
-      (external-program:run "grep" (list "-C" 3 "should" (path-to-file)))
+      (external-program:run "grep"
+                            (list "-C" 3 "should" #.*compile-file-truename*))
     (is (eq status :exited))
     (is (= code 0))))
 
