@@ -8,7 +8,11 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (require :osi))
 
-(defmethod run (program args &key input if-input-does-not-exist output if-output-exists error if-error-exists)
+(defmethod run
+    (program args
+     &key
+     input if-input-does-not-exist output if-output-exists error if-error-exists
+     &allow-other-keys)
   (let ((input-stream (etypecase input
                         (stream input)
                         ((or pathname string)

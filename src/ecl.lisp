@@ -10,13 +10,13 @@
   outputp
   stream)
 
-(defmethod run (program args &key input if-input-does-not-exist output if-output-exists error if-error-exists)
+(defmethod run (program args &key input output error &allow-other-keys)
   (if (or output error)
-      (warn "Can not control RUN-PROGRAM output in ECL."))
-  (if input (error "Can not send input to RUN-PROGRAM in ECL."))
+      (warn "Can not control EXTERNAL-PROGRAM:RUN output in ECL."))
+  (if input (error "Can not send input to EXTERNAL-PROGRAM:RUN in ECL."))
   (values :exited (si:system (format nil "~s~{ ~a~}" program args))))
 
-(defmethod start (program args &key input if-input-does-not-exist output if-output-exists error if-error-exists)
+(defmethod start (program args &key input output error &allow-other-keys)
   (if (eq error :stream)
       (error "ECL can not create a stream for error output."))
   (make-external-process :inputp (eq input :stream)

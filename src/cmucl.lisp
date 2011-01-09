@@ -5,10 +5,10 @@
 
 ;;;; Documentation at http://common-lisp.net/project/cmucl/doc/cmu-user/extensions.html#toc46
 
-(defmethod run (program args &key pty input if-input-does-not-exist output if-output-exists error if-error-exists status-hook &rest rest)
+(defmethod run (program args &rest rest &key &allow-other-keys)
   (process-status (apply #'ext:run-program program args :wait t rest)))
 
-(defgeneric start (program args &key pty input if-input-does-not-exist output if-output-exists error if-error-exists status-hook &rest rest)
+(defgeneric start (program args &rest rest &key &allow-other-keys)
   (apply #'ext:run-program program args :wait nil rest))
 
 (defgeneric signal-process (process signal)

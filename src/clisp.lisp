@@ -9,8 +9,12 @@
   in-stream
   out-stream)
 
-(defmethod run (program args &key input if-input-does-not-exist output if-output-exists error if-error-exists)
-  (let ((result (ext:run-program program :arguments args
+(defmethod run
+    (program args &key input output if-output-exists error &allow-other-keys)
+  (when error
+    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
+  (let ((result (ext:run-program program
+                                 :arguments args
                                  :input (if (eq input t) :terminal input)
                                  :output (if (eq output t) :terminal output)
                                  :if-output-exists if-output-exists
@@ -18,7 +22,10 @@
     (values (if result :exited :signaled) result)))
 
 
-(defmethod start (program args &key pty input if-input-does-not-exist output if-output-exists error if-error-exists status-hook)
+(defmethod start
+    (program args &key input output if-output-exists error &allow-other-keys)
+  (when error
+    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
   (multiple-value-bind (primary-stream input-stream output-stream)
       (ext:run-program program :arguments args
                        :input (if (eq input t) :terminal input)

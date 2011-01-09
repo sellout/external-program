@@ -10,7 +10,11 @@
   outputp
   stream)
 
-(defmethod run (program args &key pty input if-input-does-not-exist output if-output-exists error if-error-exists status-hook)
+(defmethod run (program args &key input output error &allow-other-keys)
+  (when error
+    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in LispWorks."))
+  (when input
+    (error "Can not send input to EXTERNAL-PROGRAM:RUN in LispWorks."))
   (values :exited
           (sys:call-system-showing-output (cons program args)
                                           :prefix ""
@@ -18,7 +22,9 @@
                                           :output-stream output
                                           :wait t)))
 
-(defmethod start (program args &key pty input if-input-does-not-exist output if-output-exists error if-error-exists status-hook)
+(defmethod start (program args &key input output error &allow-other-keys)
+  (when error
+    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in ABCL."))
   (let ((direction (cond ((and (eq input :stream) (eq output :stream)) :io)
                          ((eq input :stream) :input)
                          ((eq output :stream) :output))))
