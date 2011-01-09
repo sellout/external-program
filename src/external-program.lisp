@@ -36,10 +36,11 @@ the following values:
 * `:OUTPUT`, (only available for `ERROR`) which directs the error
   output to the same destination as the standard output.
 
-`ENVIRONMENT` contains an alist mapping vars to values. Some
-implementations merge the alist with the existing environment, while
-others replace the existing environment ... not sure which is the
-right path yet.
+`ENVIRONMENT` contains an alist mapping vars to values.
+
+`REPLACE-ENVIRONMENT-P` indicates whether the argument passed as `ENVIRONMENT`
+should replace or extend the current environment. The default is `NIL` (to
+extend the environment).
 
 `STATUS-HOOK` is a function the system calls whenever the status of
 the process changes. The function takes the process as an argument.")
@@ -84,7 +85,7 @@ the process changes. The function takes the process as an argument.")
   (:documentation "Sends the specified unix signal to the specified
   external process. Signals an error if unsuccessful. The signal may
   be either an integer, or one of the keywords in
-  `EXTERNAL-PROGRAM::*SIGNAL-MAPPING*`")
+  `EXTERNAL-PROGRAM::*SIGNAL-MAPPING*`.")
   (:method (process signal)
     (declare (ignore signal))
     (if (process-p process)
