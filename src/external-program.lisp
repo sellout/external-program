@@ -11,25 +11,52 @@
 
 (in-package :external-program)
 
-(defgeneric start (program args &key input if-input-does-not-exist output if-output-exists error if-error-exists)
-  (:documentation "Runs the specified program in an external (Unix)
-  process, returning a process object if successful.
+(defgeneric start
+    (program args
+     &key
+     input if-input-does-not-exist output if-output-exists error if-error-exists
+     environment replace-environment-p
+     status-hook)
+  (:documentation
+   "Runs the specified program in an external (Unix) process,
+returning a process object if successful.
 
-`INPUT`, `OUTPUT`, and `ERROR` all behave similarly, accepting one of the following values:
-* `NIL`, specifying that a null stream (e.g., `/dev/null`) should be used;
-* `T`, specifying that the `EXTERNAL-PROCESS` should use the source or destination with which the Lisp was invoked;
+`INPUT`, `OUTPUT`, and `ERROR` all behave similarly, accepting one of
+the following values:
+
+* `NIL`, specifying that a null stream (e.g., `/dev/null`) should be
+  used;
+* `T`, specifying that the `EXTERNAL-PROCESS` should use the source or
+  destination with which the Lisp was invoked;
 * a stream;
 * a pathname designator, to redirect to/from a file;
-* `:STREAM`, which creates a new stream opened for character input or output (accessible via the `EXTERNAL-PROCESS-*-STREAM` functions); or
-* `:OUTPUT`, (only available for `ERROR`) which directs the error output to the same destination as the standard output.
-")
+* `:STREAM`, which creates a new stream opened for character input or
+  output (accessible via the `EXTERNAL-PROCESS-*-STREAM` functions);
+  or
+* `:OUTPUT`, (only available for `ERROR`) which directs the error
+  output to the same destination as the standard output.
+
+`ENVIRONMENT` contains an alist mapping vars to values. Some
+implementations merge the alist with the existing environment, while
+others replace the existing environment ... not sure which is the
+right path yet.
+
+`STATUS-HOOK` is a function the system calls whenever the status of
+the process changes. The function takes the process as an argument.")
   (:method (program args &rest rest)
     (declare (ignore program args rest))
     (error "This CL implementation does not support START."))
   (:method ((program pathname) args &rest rest)
     (apply #'start (namestring program) args rest)))
 
-(defgeneric run (program args &key input if-input-does-not-exist output if-output-exists error if-error-exists)
+;;; FIXME: should status-hook be available here? If so, :STREAM might
+;;; then be a valid arg, since the streams can be accessed from the
+;;; status-hook
+(defgeneric run
+    (program args
+     &key
+     input if-input-does-not-exist output if-output-exists error if-error-exists
+     environment replace-environment-p)
   (:documentation "Runs the specified program similarly to `START`,
   however it blocks and returns the external process status once the
   program exits.
@@ -41,6 +68,17 @@
     (let ((process (apply #'start program args rest)))
       (do ((status (process-status process) (process-status process)))
           ((not (eq status :running)) (process-status process))))))
+
+;;; FIXME: can we use something like this to catch certain classes of errors?
+;; (defmethod run :around (program args &rest rest)
+;;   (multiple-value-bind (status code) (call-next-method)
+;;     (if (eql status :exited)
+;;         (case code
+;;           (0 (values))
+;;           (71 (error 'program-not-found :program program))
+;;           (t (error 'program-exited-with-error
+;;                     :program program :code code))))
+;;     (values status code)))
 
 (defgeneric signal-process (process signal)
   (:documentation "Sends the specified unix signal to the specified
@@ -101,7 +139,6 @@
         (error "This CL implementation does not support PROCESS-STATUS.")
         (error "Incorrect argument type (~a) for PROCESS-STATUS."
                (type-of process)))))
-
 
 (defgeneric process-p (process)
   (:documentation "`T` if object is a process, `NIL` otherwise.")

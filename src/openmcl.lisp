@@ -3,12 +3,14 @@
 
 (in-package :external-program)
 
-;;;; Documentation at http://openmcl.clozure.com/Doc/External_002dProgram-Dictionary.html
+;;;; Documentation at http://openmcl.clozure.com/Doc/#External_002dProgram-Dictionary
 
 (defmethod run (program args &rest rest)
+  (rename-parameter :environment :env rest)
   (process-status (apply #'ccl:run-program program args :wait t rest)))
 
 (defmethod start (program args &rest rest)
+  (rename-parameter :environment :env rest)
   (apply #'ccl:run-program program args :wait nil rest))
 
 (defmethod signal-process ((process ccl:external-process) signal)

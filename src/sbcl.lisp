@@ -5,12 +5,33 @@
 
 ;;;; Documentation at http://www.sbcl.org/manual/Support-For-Unix.html
 
-(defmethod run (program args &rest rest)
-  (process-status (apply #'sb-ext:run-program
-                         program args :search t :wait t rest)))
+(defun reformat-env (env)
+  "SBCL accepts vars as either (\"FOO=meh\" ...) or ((:foo . \"meh\")
+  ...), but not ((\"FOO\" . \"meh\") ...), so we build up the first
+  kind (since the second kind is potentially lossy)."
+  ;; FIXME: probably need to escape single-quotes and backslashes
+  (mapcar (lambda (var) (format nil "~a='~a'" (car var) (cdr var))) env))
 
-(defmethod start (program args &rest rest)
-  (apply #'sb-ext:run-program program args :search t :wait nil rest))
+(defun convert-environment (rest environment replace-environment-p)
+  (let ((env (reformat-env environment)))
+    (setf (getf rest :environment)
+          (if replace-environment-p
+              env
+              (append env sb-ext:*current-environment*))))
+  (remove-parameter :replace-environment-p rest)
+  rest)
+
+(defmethod run (program args &rest rest
+                &key environment replace-environment-p &allow-other-keys)
+  (process-status (apply #'sb-ext:run-program
+                         program args :search t :wait t
+                         (convert-environment rest
+                                              enviromnent
+                                              replace-environment-p))))
+
+(defmethod start (program args &rest rest &key &allow-other-keys)
+  (apply #'sb-ext:run-program program args :search t :wait nil
+         (convert-environment rest enviromnent replace-environment-p)))
 
 (defmethod signal-process (process signal)
   (sb-ext:process-kill process (cdr (assoc signal *signal-mapping*))))
