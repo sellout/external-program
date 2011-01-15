@@ -176,3 +176,11 @@ the process changes. The function takes the process as an argument.")
               (number                (format nil "~a" arg))
               (pathname              (namestring arg))))
           args))
+
+(defun make-shell-string (program args environment replace-environment-p)
+  (format nil "~:[~;env -i PATH=''~] ~:{~a=~s ~}~a~{ ~s~}"
+          replace-environment-p
+          (mapcar (lambda (var) (list (car var) (cdr var)))
+                  environment)
+          program
+          (stringify-args args)))
