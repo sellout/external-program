@@ -12,9 +12,8 @@
     (program args
      &key
      input if-input-does-not-exist output if-output-exists error if-error-exists
-     environment replace-environment-p status-hook
+     environment replace-environment-p
      &allow-other-keys)
-  (when status-hook (warn ":STATUS-HOOK is not supported by Allegro."))
   (let* ((input-stream (etypecase input
                          (stream input)
                          ((or pathname string)
