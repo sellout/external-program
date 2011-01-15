@@ -3,28 +3,31 @@
 
 (in-package :external-program)
 
-;;;; Documentation at http://www.sbcl.org/manual/Running-external-programs.html#Running-external-programs
+;;;; Documentation at http://www.sbcl.org/manual/Running-external-programs.html
 
 (defun convert-environment (rest environment replace-environment-p)
-  (let ((env (reformat-env environment)))
+  (let ((env (reformat-environment environment)))
     (setf (getf rest :environment)
           (if replace-environment-p
-              env
-              (append env sb-ext:*current-environment*))))
-  (remf :replace-environment-p rest)
+              (append env '("PATH=''"))
+              (append env (sb-ext:posix-environ)))))
+  (remf rest :replace-environment-p)
   rest)
 
-(defmethod run (program args &rest rest
-                &key environment replace-environment-p &allow-other-keys)
+(defmethod run
+    (program args
+     &rest rest &key environment replace-environment-p &allow-other-keys)
   (process-status (apply #'sb-ext:run-program
-                         program args :search t :wait t
+                         program (stringify-args args) :search t :wait t
                          (convert-environment rest
-                                              enviromnent
+                                              environment
                                               replace-environment-p))))
 
-(defmethod start (program args &rest rest &key &allow-other-keys)
-  (apply #'sb-ext:run-program program args :search t :wait nil
-         (convert-environment rest enviromnent replace-environment-p)))
+(defmethod start
+    (program args
+     &rest rest &key environment replace-environment-p &allow-other-keys)
+  (apply #'sb-ext:run-program program (stringify-args args) :search t :wait nil
+         (convert-environment rest environment replace-environment-p)))
 
 (defmethod signal-process (process signal)
   (sb-ext:process-kill process (cdr (assoc signal *signal-mapping*))))
