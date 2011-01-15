@@ -3,15 +3,34 @@
 
 (in-package :external-program)
 
-;;;; Documentation at http://common-lisp.net/project/cmucl/doc/cmu-user/extensions.html#toc46
+;;; Documentation at http://common-lisp.net/project/cmucl/doc/cmu-user/extensions.html#toc45
 
-(defmethod run (program args &rest rest &key &allow-other-keys)
-  (process-status (apply #'ext:run-program program args :wait t rest)))
+(defun convert-environment (rest environment replace-environment-p)
+  (let ((env (mapcar (lambda (var) (cons (intern (car var) :keyword) (cdr var)))
+                     environment)))
+    (setf (getf rest :env)
+          (if replace-environment-p
+              (append env '((:PATH . "")))
+              (append env ext:*environment-list*))))
+  (remf rest :replace-environment-p)
+  (remf rest :environment)
+  rest)
 
-(defgeneric start (program args &rest rest &key &allow-other-keys)
-  (apply #'ext:run-program program args :wait nil rest))
+(defmethod run
+    (program args
+     &rest rest &key environment replace-environment-p &allow-other-keys)
+  (process-status (apply #'ext:run-program
+                         program (stringify-args args) :wait t
+                         (convert-environment rest environment replace-environment-p))))
 
-(defgeneric signal-process (process signal)
+(defmethod start
+    (program args
+     &rest rest &key environment replace-environment-p &allow-other-keys)
+  (apply #'ext:run-program
+         program (stringify-args args) :wait nil
+         (convert-environment rest environment replace-environment-p)))
+
+(defmethod signal-process (process signal)
   (ext:process-kill process (cdr (assoc signal *signal-mapping*))))
 
 (defmethod process-id (process)
