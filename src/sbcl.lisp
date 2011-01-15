@@ -5,13 +5,6 @@
 
 ;;;; Documentation at http://www.sbcl.org/manual/Running-external-programs.html#Running-external-programs
 
-(defun reformat-env (env)
-  "SBCL accepts vars as either (\"FOO=meh\" ...) or ((:foo . \"meh\")
-  ...), but not ((\"FOO\" . \"meh\") ...), so we build up the first
-  kind (since the second kind is potentially lossy)."
-  ;; FIXME: probably need to escape single-quotes and backslashes
-  (mapcar (lambda (var) (format nil "~a='~a'" (car var) (cdr var))) env))
-
 (defun convert-environment (rest environment replace-environment-p)
   (let ((env (reformat-env environment)))
     (setf (getf rest :environment)

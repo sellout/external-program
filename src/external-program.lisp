@@ -177,10 +177,16 @@ the process changes. The function takes the process as an argument.")
               (pathname              (namestring arg))))
           args))
 
+(defun reformat-environment (environment)
+  "SBCL accepts vars as either (\"FOO=meh\" ...) or ((:foo . \"meh\")
+  ...), but not ((\"FOO\" . \"meh\") ...), so we build up the first
+  kind (since the second kind is potentially lossy)."
+  ;; FIXME: probably need to escape single-quotes and backslashes
+  (mapcar (lambda (var) (format nil "~a=~s" (car var) (cdr var))) environment))
+
 (defun make-shell-string (program args environment replace-environment-p)
   (format nil "~:[~;env -i PATH=''~] ~:{~a=~s ~}~a~{ ~s~}"
           replace-environment-p
-          (mapcar (lambda (var) (list (car var) (cdr var)))
-                  environment)
+          (reformat-environment environment)
           program
           (stringify-args args)))
