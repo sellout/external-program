@@ -41,12 +41,8 @@
                          (symbol output-stream))))
     (values :exited
             (excl.osi:with-command-io
-                ((format nil "~:[~;env -i PATH=''~] ~:{~a=~s ~}~a~{ ~s~}"
-                         replace-environment-p
-                         (mapcar (lambda (var) (list (car var) (cdr var)))
-                                 environment)
-                         program
-                         (stringify-args args)))
+                ((make-shell-string program args
+                                    environment replace-environment-p))
               (:input (stream)
                       (when input-stream
                         (make-echo-stream input-stream stream)))
