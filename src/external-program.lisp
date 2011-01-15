@@ -167,3 +167,12 @@ the process changes. The function takes the process as an argument.")
   (setf (getf rest to-name) (getf rest from-name))
   (remf rest from-name)
   rest)
+
+(defun stringify-args (args)
+  (mapcar (lambda (arg)
+            (typecase arg
+              (sequence              (coerce arg 'string))
+              ((or symbol character) (string arg))
+              (number                (format nil "~a" arg))
+              (pathname              (namestring arg))))
+          args))

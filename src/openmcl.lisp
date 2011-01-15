@@ -5,15 +5,6 @@
 
 ;;;; Documentation at http://ccl.clozure.com/ccl-documentation.html#External-Program-Dictionary(
 
-(defun stringify-args (args)
-  (mapcar (lambda (arg)
-            (typecase arg
-              (sequence              (coerce arg 'string))
-              ((or symbol character) (string arg))
-              (number                (format nil "~a" arg))
-              (pathname              (namestring arg))))
-          args))
-
 (defun convert-environment (rest)
   (remf rest :replace-environment-p)
   (rename-parameter :environment :env rest))
@@ -21,7 +12,8 @@
 (defmethod run
     (program args &rest rest &key replace-environment-p &allow-other-keys)
   (when replace-environment-p
-    (warn "REPLACE-ENVIRONMENT-P is not supported on CCL."))
+    (setf program "env")
+    (setf args (append (list "-i" program) args)))
   (process-status (apply #'ccl:run-program
                          program (stringify-args args) :wait t
                          (convert-environment rest))))
@@ -29,7 +21,8 @@
 (defmethod start
     (program args &rest rest &key replace-environment-p &allow-other-keys)
   (when replace-environment-p
-    (warn "REPLACE-ENVIRONMENT-P is not supported on CCL."))
+    (setf program "env")
+    (setf args (append (list "-i" program) args)))
   (apply #'ccl:run-program
          program (stringify-args args) :wait nil (convert-environment rest)))
 
