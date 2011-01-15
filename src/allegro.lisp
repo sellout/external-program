@@ -12,32 +12,46 @@
     (program args
      &key
      input if-input-does-not-exist output if-output-exists error if-error-exists
+     environment replace-environment-p status-hook
      &allow-other-keys)
-  (let ((input-stream (etypecase input
-                        (stream input)
-                        ((or pathname string)
-                         (open input
-                               :if-does-not-exist if-input-does-not-exist))
-                        (null nil)
-                        (boolean *standard-input*))))
-    (multiple-value-bind (output-string error-string status)
-        (excl.osi:command-output (format nil "~s~{ ~a~}" program args)
-                                 :whole t
-                                 :input input-stream)
-      (typecase output
-        (stream (write-sequence output-string output))
-        ((or pathname string)
-         (with-open-file (out output
-                              :direction :output
-                              :if-exists if-output-exists)
-           (write-sequence output-string out)))
-        (boolean (and output (write-sequence output-string *standard-output*))))
-      (typecase error
-        (stream (write-sequence error-string error))
-        ((or pathname string)
-         (with-open-file (err error
-                              :direction :output
-                              :if-exists if-error-exists)
-           (write-sequence error-string err)))
-        (boolean (and error (write-sequence error-string *error-output*))))
-      (values :exited status))))
+  (when status-hook (warn ":STATUS-HOOK is not supported by Allegro."))
+  (let* ((input-stream (etypecase input
+                         (stream input)
+                         ((or pathname string)
+                          (open input
+                                :if-does-not-exist if-input-does-not-exist))
+                         (null nil)
+                         (boolean *standard-input*)))
+         (output-stream (etypecase input
+                          (stream output)
+                          ((or pathname string)
+                           (open output
+                                 :direction :output
+                                 :if-exists if-output-exists))
+                          (null nil)
+                          (boolean *standard-output*)))
+         (error-stream (etypecase input
+                         (stream error)
+                         ((or pathname string)
+                          (open error
+                                :direction :output
+                                :if-exists if-error-exists))
+                         (null nil)
+                         (boolean *standard-output*)
+                         (symbol output-stream))))
+    (values :exited
+            (excl.osi:with-command-io
+                ((format nil "~:[~;env -i PATH=''~] ~:{~a=~s ~}~a~{ ~s~}"
+                         replace-environment-p
+                         (mapcar (lambda (var) (list (car var) (cdr var)))
+                                 environment)
+                         program
+                         (stringify-args args)))
+              (:input (stream)
+                      (when input-stream
+                        (make-echo-stream input-stream stream)))
+              (:output (line)
+                       (when output-stream (write-line line output-stream)))
+              (:error-output (line)
+                             (when error-stream
+                               (write-line line error-stream)))))))
