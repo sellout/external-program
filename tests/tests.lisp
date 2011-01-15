@@ -11,11 +11,11 @@
 ;;; FIXME: should probably signal a condition if program isn't found
 ;;; ... but can't guarantee that 71 isn't returned by the program
 ;;; itself ...
-(test should-not-have-access-to-shell-builtins
+(test should-have-access-to-shell-builtins
   (multiple-value-bind (status code)
       (external-program:run "cd" '())
     (is (eq :exited status))
-    (is (= 71 code))))
+    (is (= 0 code))))
 
 (test should-discover-programs-in-path
   (multiple-value-bind (status code)
