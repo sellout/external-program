@@ -13,25 +13,27 @@
 ;;; itself ...
 (test should-not-have-access-to-shell-builtins
   (multiple-value-bind (status code)
-      (external-program:run "source" '("foo"))
+      (external-program:run "cd" '())
     (is (eq :exited status))
     (is (= 71 code))))
 
 (test should-discover-programs-in-path
   (multiple-value-bind (status code)
-      (external-program:run "which" '("which"))
+      (external-program:run "which" '("ls"))
     (is (eq :exited status))
     (is (= 0 code))))
 
 (test should-be-able-to-use-pathname-as-program
   (multiple-value-bind (status code)
-      (external-program:run (make-pathname :name "which") '("which"))
+      (external-program:run (make-pathname :name "ls") '("."))
     (is (eq :exited status))
     (is (= 0 code))))
 
 (test should-be-able-to-use-pathnames-as-args
   (multiple-value-bind (status code)
-      (external-program:run "which" (list (make-pathname :name "which")))
+      (external-program:run "ls"
+                            (list (merge-pathnames (make-pathname :name nil)
+                                                   #.*compile-file-truename*)))
     (is (eq :exited status))
     (is (= 0 code))))
 
@@ -50,6 +52,6 @@
 
 (test empty-env-should-erase-all
   (multiple-value-bind (status code)
-      (external-program:run "which" '("which") :replace-environment-p t)
+      (external-program:run "ls" '(".") :replace-environment-p t)
     (is (eq :exited status))
-    (is (= 71 code))))
+    (is (/= 0 code))))
