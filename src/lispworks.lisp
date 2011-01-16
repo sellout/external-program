@@ -3,41 +3,47 @@
 
 (in-package :external-program)
 
-;;;; Documentation at http://www.lispworks.com/documentation/lwl42/LWRM-U/html/lwref-u-421.htm
+;;; Documentation at http://www.lispworks.com/documentation/lwl42/LWRM-U/html/lwref-u-421.htm
+;;; The docs say that :ENVIRONMENT should be an alist, but it should actually be
+;;; a list of proper lists.
 
 (defstruct external-process
+  process-id
   inputp
   outputp
-  stream)
+  stream
+  error-stream)
 
-(defmethod run (program args &key input output error &allow-other-keys)
-  (when error
-    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in LispWorks."))
-  (when input
-    (error "Can not send input to EXTERNAL-PROGRAM:RUN in LispWorks."))
+(defun convert-rest (rest)
+  (setf (getf rest :error-output) (getf rest :error))
+  (remf rest :error)
+  (remf rest :replace-environment-p)
+  (setf (getf rest :environment)
+        (mapcar (lambda (var) (list (car var) (cdr var)))
+                (getf rest :environment)))
+  rest)
+
+(defmethod run
+    (program args &rest rest &key replace-environment-p &allow-other-keys)
   (values :exited
-          (sys:call-system-showing-output (cons program args)
-                                          :prefix ""
-                                          :show-cmd nil
-                                          :output-stream output
-                                          :wait t)))
+          (apply #'sys:run-shell-command
+                 (make-shell-string program args nil replace-environment-p)
+                 :wait t
+                 (convert-rest rest))))
 
-(defmethod start (program args &key input output error &allow-other-keys)
-  (when error
-    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in ABCL."))
-  (let ((direction (cond ((and (eq input :stream) (eq output :stream)) :io)
-                         ((eq input :stream) :input)
-                         ((eq output :stream) :output))))
-    (if direction
-        (make-external-process :inputp input :outputp output
-                               :stream (sys:open-pipe (format nil "~s~{ ~a~}"
-                                                              program args)
-                                                      :direction direction))
-        (sys:call-system-showing-output (cons program args)
-                                        :prefix ""
-                                        :show-cmd nil
-                                        :output-stream output
-                                        :wait nil))))
+(defmethod start
+    (program args
+     &rest rest &key input output replace-environment-p &allow-other-keys)
+  (multiple-value-bind (stream error-stream process-id)
+      (apply #'sys:run-shell-command
+                 (make-shell-string program args nil replace-environment-p)
+                 :wait t
+                 (convert-rest rest))
+    (make-external-process :process-id process-id
+                           :inputp (eq input :stream)
+                           :outputp (eq output :stream)
+                           :stream stream
+                           :error-stream error-stream)))
 
 (defmethod process-input-stream (process)
   (if (external-process-inputp process)
@@ -48,7 +54,12 @@
       (external-process-stream process)))
 
 (defmethod process-error-stream (process)
-  nil)
+  (external-process-error-stream process))
+
+(defmethod process-status (process)
+  (let ((status-code (sys:pid-exit-status (external-process-process-id
+                                           process))))
+    (values (if status-code :exited :running) status-code)))
 
 (defmethod process-p (process)
   (typep process 'external-process))
