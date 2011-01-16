@@ -12,6 +12,7 @@
   :version "0.0.6"
   :pathname "src/"
   :components ((:file "external-program")
+               (:file "utilities" :depends-on ("external-program"))
                (:file #+allegro "allegro"
                       #+armedbear "armedbear"
                       #+clisp "clisp"
@@ -27,7 +28,7 @@
                       #-(or allegro armedbear clisp cmu ecl lispworks openmcl
                             sbcl)
                       "unsupported"
-                      :depends-on ("external-program")))
+                      :depends-on ("utilities")))
   :in-order-to ((test-op (load-op external-program-test)))
   :perform (test-op :after (op c)
                     (funcall (intern "RUN!" :external-program-tests)
