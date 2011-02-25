@@ -1,5 +1,7 @@
 `EXTERNAL-PROGRAM` is an attempt to make the `RUN-PROGRAM` functionality in implementations like SBCL and CCL as portable as possible without sacrificing much in the way of power.
 
+**Note**: This library is available via [Quicklisp](https://quicklisp.org/).
+
 Here are some of the differences:
 
 * splits `START` (async) and `RUN` (sync) into two separate functions, rather than using a single function with a `WAIT` parameter that changes the function's specification;
