@@ -36,9 +36,10 @@
                      :output (if (eq output t) :terminal output)
                      :if-output-exists if-output-exists
                      :wait nil)
+    (when input-stream (close primary-stream))
     (make-external-process
-      :in-stream (when (eq input :stream) input-stream)
-      :out-stream (when (eq output :stream) output-stream))))
+      :out-stream (when (eq output :stream) (or output-stream primary-stream))
+      :in-stream (when (eq input :stream) (or input-stream primary-stream)))))
 
 (defmethod process-input-stream (process)
   (external-process-in-stream process))
