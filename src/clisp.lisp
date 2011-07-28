@@ -30,7 +30,7 @@
     (error "CLISP does not support supplying streams for input or output."))
   (when error
     (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
-  (multiple-value-bind (primary-stream input-stream output-stream)
+  (multiple-value-bind (primary-stream output-stream input-stream)
     (ext:run-program program :arguments args
                      :input (if (eq input t) :terminal input)
                      :output (if (eq output t) :terminal output)
