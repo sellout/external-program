@@ -7,7 +7,7 @@ Here are some of the differences:
 * splits `START` (async) and `RUN` (sync) into two separate functions, rather than using a single function with a `WAIT` parameter that changes the function's specification;
 * offers a `REPLACE-ENVIRONMENT-P` parameter that indicates whether provided env vars should build on or replace the current environment.
 
-Read [the API documention]() for details. It’s a bit spartan, but should explain a lot.
+Read [the API documention](https://github.com/sellout/external-program/wiki/API) for details. It’s a bit spartan, but should explain a lot.
 
 Not all functionality is available on all platforms. `EXTERNAL-PROGRAM` provides warnings and errors when these limitations are encountered. But I'll try my best to work around them.
 
