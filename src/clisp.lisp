@@ -19,8 +19,9 @@
                                  :output (if (eq output t) :terminal output)
                                  :if-output-exists if-output-exists
                                  :wait t)))
-    (values (if result :exited :signaled) result)))
-
+    (cond ((null result) (values :exited 0))
+          ((< 0 result)  (values :signaled (- result)))
+          (t             (values :exited result)))))
 
 (defmethod start
     (program args &key input output if-output-exists error &allow-other-keys)
