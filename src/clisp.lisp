@@ -49,6 +49,7 @@
   (external-process-out-stream process))
 
 (defmethod process-error-stream (process)
+  (declare (ignore process))
   nil)
 
 (defmethod process-p (process)
