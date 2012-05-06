@@ -10,37 +10,46 @@
   out-stream)
 
 (defmethod run
-    (program args &key input output if-output-exists error &allow-other-keys)
+    (program args
+     &key input output if-output-exists error environment replace-environment-p
+     &allow-other-keys)
   (when error
     (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
-  (let ((result (ext:run-program program
-                                 :arguments (stringify-args args)
-                                 :input (if (eq input t) :terminal input)
-                                 :output (if (eq output t) :terminal output)
-                                 :if-output-exists if-output-exists
-                                 :wait t)))
-    (cond ((null result) (values :exited 0))
-          ((< 0 result)  (values :signaled (- result)))
-          (t             (values :exited result)))))
+  (multiple-value-bind (program args)
+      (embed-environment program args environment replace-environment-p)
+    (break "~A ~A" program args)
+    (let ((result (ext:run-program program
+                                   :arguments (stringify-args args)
+                                   :input (if (eq input t) :terminal input)
+                                   :output (if (eq output t) :terminal output)
+                                   :if-output-exists if-output-exists
+                                   :wait t)))
+      (cond ((null result) (values :exited 0))
+            ((< result 0)  (values :signaled (- result)))
+            (t             (values :exited result))))))
 
 (defmethod start
-    (program args &key input output if-output-exists error &allow-other-keys)
+    (program args
+     &key input output if-output-exists error environment replace-environment-p
+     &allow-other-keys)
   (when error
     (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
-  (multiple-value-bind (primary-stream input-stream output-stream)
-      (ext:run-program program :arguments args
-                       :input (if (eq input t) :terminal input)
-                       :output (if (eq output t) :terminal output)
-                       :if-output-exists if-output-exists
-                       :wait nil)
-    (cond ((and (eq input :stream) (eq output :stream))
-           (close primary-stream)
-           (make-external-process :in-stream input-stream
-                                  :out-stream output-stream))
-          ((eq input :stream)
-           (make-external-process :in-stream primary-stream))
-          ((eq output :stream)
-           (make-external-process :out-stream primary-stream)))))
+  (multiple-value-bind (program args)
+      (embed-environment program args environment replace-environment-p)
+    (multiple-value-bind (primary-stream input-stream output-stream)
+        (ext:run-program program :arguments args
+                         :input (if (eq input t) :terminal input)
+                         :output (if (eq output t) :terminal output)
+                         :if-output-exists if-output-exists
+                         :wait nil)
+      (cond ((and (eq input :stream) (eq output :stream))
+             (close primary-stream)
+             (make-external-process :in-stream input-stream
+                                    :out-stream output-stream))
+            ((eq input :stream)
+             (make-external-process :in-stream primary-stream))
+            ((eq output :stream)
+             (make-external-process :out-stream primary-stream))))))
 
 (defmethod process-input-stream (process)
   (external-process-in-stream process))

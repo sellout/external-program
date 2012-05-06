@@ -22,6 +22,14 @@
   (mapcar (lambda (var) (format nil "~a='~a'" (car var) (cdr var)))
           environment))
 
+(defun embed-environment (program args environment replace-environment-p)
+  (if (or environment replace-environment-p)
+      (values "env"
+              (append (when replace-environment-p (list "-i" "PATH=''"))
+                      (reformat-environment environment)
+                      (cons program args)))
+      (values program args)))
+
 (defun make-shell-string (program args environment replace-environment-p)
   (format nil "~:[~;env -i PATH=''~] ~:{~a=~s ~}~a~{ ~s~}"
           replace-environment-p
