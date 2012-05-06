@@ -31,15 +31,15 @@
                        :input (if (eq input t) :terminal input)
                        :output (if (eq output t) :terminal output)
                        :if-output-exists if-output-exists
-                       :wait nil))
-  (cond ((and (eq input :stream) (eq output :stream))
-         (close primary-stream)
-         (make-external-process :in-stream input-stream
-                                :out-stream output-stream))
-        ((eq input :stream)
-         (make-external-process :in-stream primary-stream))
-        ((eq output :stream)
-         (make-external-process :out-stream primary-stream))))
+                       :wait nil)
+    (cond ((and (eq input :stream) (eq output :stream))
+           (close primary-stream)
+           (make-external-process :in-stream input-stream
+                                  :out-stream output-stream))
+          ((eq input :stream)
+           (make-external-process :in-stream primary-stream))
+          ((eq output :stream)
+           (make-external-process :out-stream primary-stream)))))
 
 (defmethod process-input-stream (process)
   (external-process-in-stream process))
