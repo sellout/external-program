@@ -14,7 +14,7 @@
   (when error
     (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
   (let ((result (ext:run-program program
-                                 :arguments args
+                                 :arguments (stringify-args args)
                                  :input (if (eq input t) :terminal input)
                                  :output (if (eq output t) :terminal output)
                                  :if-output-exists if-output-exists
