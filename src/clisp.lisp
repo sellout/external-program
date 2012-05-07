@@ -13,11 +13,12 @@
     (program args
      &key input output if-output-exists error environment replace-environment-p
      &allow-other-keys)
+  (when (or (streamp input) (streamp output))
+    (error "CLISP does not support supplying streams for input or output."))
   (when error
     (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
   (multiple-value-bind (program args)
       (embed-environment program args environment replace-environment-p)
-    (break "~A ~A" program args)
     (let ((result (ext:run-program program
                                    :arguments (stringify-args args)
                                    :input (if (eq input t) :terminal input)
@@ -32,24 +33,22 @@
     (program args
      &key input output if-output-exists error environment replace-environment-p
      &allow-other-keys)
+  (when (or (streamp input) (streamp output))
+    (error "CLISP does not support supplying streams for input or output."))
   (when error
     (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
   (multiple-value-bind (program args)
       (embed-environment program args environment replace-environment-p)
-    (multiple-value-bind (primary-stream input-stream output-stream)
+    (multiple-value-bind (primary-stream output-stream input-stream)
         (ext:run-program program :arguments args
                          :input (if (eq input t) :terminal input)
                          :output (if (eq output t) :terminal output)
                          :if-output-exists if-output-exists
                          :wait nil)
-      (cond ((and (eq input :stream) (eq output :stream))
-             (close primary-stream)
-             (make-external-process :in-stream input-stream
-                                    :out-stream output-stream))
-            ((eq input :stream)
-             (make-external-process :in-stream primary-stream))
-            ((eq output :stream)
-             (make-external-process :out-stream primary-stream))))))
+      (when input-stream (close primary-stream))
+      (make-external-process
+       :out-stream (when (eq output :stream) (or output-stream primary-stream))
+       :in-stream (when (eq input :stream) (or input-stream primary-stream))))))
 
 (defmethod process-input-stream (process)
   (external-process-in-stream process))
