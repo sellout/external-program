@@ -9,14 +9,17 @@
   in-stream
   out-stream)
 
+(defun check-arguments (input output error)
+  (when (or (streamp input) (streamp output))
+    (error "CLISP does not support supplying streams for input or output."))
+  (when error
+    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP.")))
+
 (defmethod run
     (program args
      &key input output if-output-exists error environment replace-environment-p
      &allow-other-keys)
-  (when (or (streamp input) (streamp output))
-    (error "CLISP does not support supplying streams for input or output."))
-  (when error
-    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
+  (check-arguments input output error)
   (multiple-value-bind (program args)
       (embed-environment program args environment replace-environment-p)
     (let ((result (ext:run-program program
@@ -33,10 +36,7 @@
     (program args
      &key input output if-output-exists error environment replace-environment-p
      &allow-other-keys)
-  (when (or (streamp input) (streamp output))
-    (error "CLISP does not support supplying streams for input or output."))
-  (when error
-    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP."))
+  (check-arguments input output error)
   (multiple-value-bind (program args)
       (embed-environment program args environment replace-environment-p)
     (multiple-value-bind (primary-stream output-stream input-stream)
