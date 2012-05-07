@@ -18,18 +18,15 @@
   (if (or output error)
       (warn "Can not control EXTERNAL-PROGRAM:RUN output in ECL."))
   (if input (error "Can not send input to EXTERNAL-PROGRAM:RUN in ECL."))
-  (when replace-environment-p
-    (setf args (append (list "-i" program "PATH=''") args))
-    (setf program "env"))
-  (values :exited
-          (nth-value 1
-                     (ext:run-program program (stringify-args args)
-                                      :wait t
-                                      :input input
-                                      :output output
-                                      :error error
-                                      :environ (reformat-environment
-                                                environment)))))
+  (multiple-value-bind (program args)
+      (embed-environment program args environment replace-environment-p)
+    (values :exited
+            (nth-value 1
+                       (ext:run-program program (stringify-args args)
+                                        :wait t
+                                        :input input
+                                        :output output
+                                        :error error)))))
 
 (defmethod start
     (program args
@@ -37,29 +34,29 @@
      &allow-other-keys)
   (if (eq error :stream)
       (error "ECL can not create a stream for error output."))
-  (when replace-environment-p
-    (setf args (append (list "-i" program "PATH=''") args))
-    (setf program "env"))
-  (make-external-process :inputp (eq input :stream)
-                         :outputp (eq output :stream)
-                         :stream (ext:run-program program (stringify-args args)
-                                                  :wait nil
-                                                  :input input
-                                                  :output output
-                                                  :error error
-                                                  :environ (reformat-environment
-                                                            environment))))
+  (multiple-value-bind (program args)
+      (embed-environment program args environment replace-environment-p)
+    (make-external-process :inputp (eq input :stream)
+                           :outputp (eq output :stream)
+                           :stream (ext:run-program program
+                                                    (stringify-args args)
+                                                    :wait nil
+                                                    :input input
+                                                    :output output
+                                                    :error error))))
 
-(defmethod process-input-stream (process)
+(defmethod process-input-stream ((process external-process))
   (if (external-process-inputp process)
       (external-process-stream process)))
 
-(defmethod process-output-stream (process)
+(defmethod process-output-stream ((process external-process))
   (if (external-process-outputp process)
       (external-process-stream process)))
 
-(defmethod process-error-stream (process)
+(defmethod process-error-stream ((process external-process))
+  (declare (ignore process))
   nil)
 
-(defmethod process-p (process)
-  (typep process 'external-process))
+(defmethod process-p ((process external-process))
+  (declare (ignore process))
+  t)
