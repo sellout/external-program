@@ -14,11 +14,16 @@
   (remf rest :replace-environment-p)
   rest)
 
+;;; Always use /usr/bin/env in SBCL to prevent "file not found" errors (could
+;;; work around this more easily if it weren't a SIMPLE-ERROR).
+
 (defmethod run
     (program args
      &rest rest &key environment replace-environment-p &allow-other-keys)
   (process-status (apply #'sb-ext:run-program
-                         program (stringify-args args) :search t :wait t
+                         "/usr/bin/env" (stringify-args (cons program args))
+                         :search t
+                         :wait t
                          (convert-environment rest
                                               environment
                                               replace-environment-p))))
@@ -26,7 +31,8 @@
 (defmethod start
     (program args
      &rest rest &key environment replace-environment-p &allow-other-keys)
-  (apply #'sb-ext:run-program program (stringify-args args) :search t :wait nil
+  (apply #'sb-ext:run-program
+         "/usr/bin/env" (stringify-args (cons program args)) :search t :wait nil
          (convert-environment rest environment replace-environment-p)))
 
 (defmethod signal-process (process signal)
