@@ -45,21 +45,24 @@
                            :stream stream
                            :error-stream error-stream)))
 
-(defmethod process-input-stream (process)
+(defmethod process-id ((process external-process))
+  (external-process-process-id process))
+
+(defmethod process-input-stream ((process external-process))
   (if (external-process-inputp process)
       (external-process-stream process)))
 
-(defmethod process-output-stream (process)
+(defmethod process-output-stream ((process external-process))
   (if (external-process-outputp process)
       (external-process-stream process)))
 
-(defmethod process-error-stream (process)
+(defmethod process-error-stream ((process external-process))
   (external-process-error-stream process))
 
-(defmethod process-status (process)
+(defmethod process-status ((process external-process))
   (let ((status-code (sys:pid-exit-status (external-process-process-id
                                            process))))
     (values (if status-code :exited :running) status-code)))
 
-(defmethod process-p (process)
-  (typep process 'external-process))
+(defmethod process-p ((process external-process))
+  t)
