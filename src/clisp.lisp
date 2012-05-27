@@ -11,9 +11,10 @@
 
 (defun check-arguments (input output error)
   (when (or (streamp input) (streamp output))
-    (error "CLISP does not support supplying streams for input or output."))
+    (error "CLISP does not support supplying existing streams for input or ~
+            output."))
   (when error
-    (warn "Can not control EXTERNAL-PROGRAM:RUN error output in CLISP.")))
+    (warn "Can not control error output in CLISP.")))
 
 (defmethod run
     (program args
