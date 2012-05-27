@@ -6,6 +6,11 @@
 ;;;; Documentation at http://www.sbcl.org/manual/Running-external-programs.html
 
 (defun convert-environment (rest environment replace-environment-p)
+  #+win32
+  (when (or environment replace-environment-p)
+    (warn "No environment control in SBCL on Windows.")
+    (remf rest :environment))
+  #-win32
   (let ((env (reformat-environment environment)))
     (setf (getf rest :environment)
           (if replace-environment-p
