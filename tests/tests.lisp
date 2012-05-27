@@ -40,7 +40,14 @@
 (test should-be-able-to-use-numbers-as-args
   (multiple-value-bind (status code)
       (external-program:run "grep"
-                            (list "-C" 3 "should" #.*compile-file-truename*))
+                            '("-C" 3 "should" #.*compile-file-truename*))
+    (is (eq :exited status))
+    (is (= 0 code))))
+
+(test should-allow-spaces-in-args
+  (multiple-value-bind (status code)
+      (external-program:run "grep"
+                            '("should probably" #.*compile-file-truename*))
     (is (eq :exited status))
     (is (= 0 code))))
 
