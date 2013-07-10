@@ -24,7 +24,7 @@
                                 :if-does-not-exist if-input-does-not-exist))
                          (null nil)
                          (boolean *standard-input*)))
-         (output-stream (etypecase input
+         (output-stream (etypecase output
                           (stream output)
                           ((or pathname string)
                            (open output
