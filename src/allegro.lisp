@@ -47,7 +47,9 @@
                                     environment replace-environment-p))
               (:input (stream)
                       (when input-stream
-                        (make-echo-stream input-stream stream)))
+			(loop :as line := (read-line input-stream nil nil nil)
+			   :while line
+			   :do (write-line line stream))))
               (:output (line)
                        (when output-stream (write-line line output-stream)))
               (:error-output (line)
