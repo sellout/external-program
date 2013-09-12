@@ -31,7 +31,7 @@
       (values program args)))
 
 (defun make-shell-string (program args environment replace-environment-p)
-  (format nil "~:[~;env -i PATH=''~] ~:{~a=~s ~}~a~{ ~s~}"
+  (format nil "~:[~;env -i PATH=''~] ~{~a ~}~a~{ ~s~}"
           replace-environment-p
           (reformat-environment environment)
           program
