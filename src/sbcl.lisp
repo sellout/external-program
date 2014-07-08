@@ -6,11 +6,11 @@
 ;;;; Documentation at http://www.sbcl.org/manual/Running-external-programs.html
 
 (defun convert-environment (rest environment replace-environment-p)
-  #+win32
+  #+windows
   (when (or environment replace-environment-p)
     (warn "No environment control in SBCL on Windows.")
     (remf rest :environment))
-  #-win32
+  #-windows
   (let ((env (reformat-environment environment)))
     (setf (getf rest :environment)
           (if replace-environment-p
@@ -25,17 +25,32 @@
 (defmethod run
     (program args
      &rest rest &key environment replace-environment-p &allow-other-keys)
-  (process-status (apply #'sb-ext:run-program
-                         "/usr/bin/env" (stringify-args (cons program args))
-                         :search t
-                         :wait t
-                         (convert-environment rest
-                                              environment
-                                              replace-environment-p))))
+  (process-status
+    #+windows
+    (apply #'sb-ext:run-program
+           program (stringify-args args)
+           :search t
+           :wait t
+           (convert-environment rest
+                                environment
+                                replace-environment-p))
+    #-windows
+    (apply #'sb-ext:run-program
+           "/usr/bin/env" (stringify-args (cons program args))
+           :search t
+           :wait t
+           (convert-environment rest
+                                environment
+                                replace-environment-p))))
 
 (defmethod start
-    (program args
-     &rest rest &key environment replace-environment-p &allow-other-keys)
+  (program args
+           &rest rest &key environment replace-environment-p &allow-other-keys)
+  #+windows
+  (apply #'sb-ext:run-program
+         program (stringify-args args) :search t :wait nil
+         (convert-environment rest environment replace-environment-p))
+  #-windows
   (apply #'sb-ext:run-program
          "/usr/bin/env" (stringify-args (cons program args)) :search t :wait nil
          (convert-environment rest environment replace-environment-p)))
