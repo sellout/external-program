@@ -40,8 +40,14 @@
          "/usr/bin/env" (stringify-args (cons program args)) :search t :wait nil
          (convert-environment rest environment replace-environment-p)))
 
-(defmethod signal-process (process signal)
-  (sb-ext:process-kill process (cdr (assoc signal *signal-mapping*))))
+(defmethod signal-process (process (signal symbol))
+  (let ((sig (assoc signal *signal-mapping*)))
+    (if (not sig)
+        (error "Symbolic signal ~A not supported." signal)
+        (signal-process process (cdr sig)))))
+
+(defmethod signal-process (process (signal integer))
+  (sb-ext:process-kill process signal))
 
 (defmethod process-input-stream (process)
   (sb-ext:process-input process))
