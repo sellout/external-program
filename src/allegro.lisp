@@ -159,7 +159,7 @@ for later perusal."
 	 :input in :output out :error-output err
 	 :if-input-does-not-exist if-input-does-not-exist
 	 :if-output-exists if-output-exists
-	 :if-error-exists if-error-exists
+	 :if-error-output-exists if-error-exists
 	 :environment environment)
       (let ((process (make-allegro-process
 		      :input instream :output outstream :error errstream
