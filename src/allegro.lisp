@@ -8,7 +8,6 @@
 ;;;; Documentation at http://www.franz.com/support/documentation/6.2/doc/os-interface.htm#subprocess-functions-1
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (require :system)
   (require :osi))
 
 (defmethod run
