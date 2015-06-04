@@ -11,10 +11,10 @@
     (warn "No environment control in SBCL on Windows.")
     (remf rest :environment))
   #-win32
-  (let ((env (reformat-environment environment)))
+  (let ((env (environment-list environment)))
     (setf (getf rest :environment)
           (if replace-environment-p
-              (append env '("PATH=''"))
+              env
               (append env (sb-ext:posix-environ)))))
   (remf rest :replace-environment-p)
   rest)

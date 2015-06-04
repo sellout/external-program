@@ -8,15 +8,6 @@
 
 (in-suite tests)
 
-;;; FIXME: should probably signal a condition if program isn't found
-;;; ... but can't guarantee that 71 isn't returned by the program
-;;; itself ...
-(test should-have-access-to-shell-builtins
-  (multiple-value-bind (status code)
-      (external-program:run "cd" '())
-    (is (eq :exited status))
-    (is (= 0 code))))
-
 (test should-discover-programs-in-path
   (multiple-value-bind (status code)
       (external-program:run "which" '("ls"))
@@ -58,7 +49,33 @@
     (is (/= 0 code))))
 
 (test empty-env-should-erase-all
-  (multiple-value-bind (status code)
-      (external-program:run "ls" '(".") :replace-environment-p t)
+  (let* (status
+         code
+         (output
+           (with-output-to-string (out)
+             (multiple-value-setq (status code)
+               #-(or clisp ecl)
+               (external-program:run "/usr/bin/env" nil :output out :environment nil :replace-environment-p t)
+               #+(or clisp ecl)
+               (external-program:run "/usr/bin/env" nil :environment nil :replace-environment-p t)))))
     (is (eq :exited status))
-    (is (/= 0 code))))
+    (is (= 0 code))
+    #-(or clisp ecl)
+    (is-false (search "=" output))))
+
+#-(or clisp ecl)
+(test environment-vars-should-be-set
+  (let* ((environment '(("external program test var" . "test val")))
+         status
+         code
+         (output
+           (with-output-to-string (out)
+             (multiple-value-setq (status code)
+               #-(or clisp ecl)
+               (external-program:run "env" nil :output out :environment environment)
+               #+(or clisp ecl)
+               (external-program:run "env" nil :environment environment)))))
+    (is (eq :exited status))
+    (is (= 0 code))
+    #-(or clisp ecl)
+    (is-true (search "external program test var=test val" output))))
