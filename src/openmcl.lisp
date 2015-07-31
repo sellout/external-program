@@ -12,7 +12,7 @@
 (defmethod run
     (program args &rest rest &key replace-environment-p &allow-other-keys)
   (when replace-environment-p
-    (setf args (append (list "-i" program "PATH=''") args))
+    (setf args (append (list "-i" program) args))
     (setf program "env"))
   (process-status (apply #'ccl:run-program
                          program (stringify-args args) :wait t

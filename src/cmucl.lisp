@@ -10,7 +10,7 @@
                      environment)))
     (setf (getf rest :env)
           (if replace-environment-p
-              (append env '((:PATH . "")))
+              env
               (append env ext:*environment-list*))))
   (remf rest :replace-environment-p)
   (remf rest :environment)
