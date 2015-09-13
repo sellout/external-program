@@ -37,7 +37,9 @@
   (multiple-value-bind (stream error-stream process-id)
       (apply #'sys:run-shell-command
                  (make-shell-string program args nil replace-environment-p)
-                 :wait t
+                 :wait nil
+                 :save-exit-status (not (or (eq input :stream)
+                                            (eq output :stream)))
                  (convert-rest rest))
     (make-external-process :process-id process-id
                            :inputp (eq input :stream)
@@ -60,8 +62,17 @@
   (external-process-error-stream process))
 
 (defmethod process-status ((process external-process))
-  (let ((status-code (sys:pid-exit-status (external-process-process-id
-                                           process))))
+  (let ((status-code
+         #+lispworks6
+         (sys:pid-exit-status (external-process-process-id
+                               process))
+         #-lispworks6
+         (sys:pipe-exit-status (or (external-process-stream
+                                    process)
+                                   (external-process-error-stream
+                                    process))
+                               :wait nil)))
+    (format *debug-io* "Exit code: ~a~%" status-code)
     (values (if status-code :exited :running) status-code)))
 
 (defmethod process-p ((process external-process))
