@@ -72,7 +72,6 @@
                                    (external-process-error-stream
                                     process))
                                :wait nil)))
-    (format *debug-io* "Exit code: ~a~%" status-code)
     (values (if status-code :exited :running) status-code)))
 
 (defmethod process-p ((process external-process))
