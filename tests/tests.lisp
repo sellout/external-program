@@ -62,3 +62,11 @@
       (external-program:run "ls" '(".") :replace-environment-p t)
     (is (eq :exited status))
     (is (/= 0 code))))
+
+(test run-async
+  (let ((process (external-program:start "sleep" '("3"))))
+    (let ((status-1 (external-program:process-status process)))
+      (is (eq :running status-1))
+      (sleep 5)
+      (let ((status-2 (external-program:process-status process)))
+        (is (eq :exited status-2))))))
