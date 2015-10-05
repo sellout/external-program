@@ -81,7 +81,7 @@ through excl:run-shell-command to enable reaping dead children.
 Values are weak key-only hash tables containing process structures.")
 
 (defvar *allegro-unreaped-processes*
-  (make-hash-table :test #'eq :values NIL)
+  (make-hash-table :test #'eq :values nil)
   "A has hash table storing all unreaped processes to keep them from being
 collected by the GC if the caller disposes of his reference before the process dies.")
 
@@ -91,7 +91,7 @@ collected by the GC if the caller disposes of his reference before the process d
 			  *allegro-process-table*)
 		 (setf (gethash (allegro-process-pid process)
 				*allegro-process-table*)
-		       (make-hash-table :test #'eq :weak-keys T :values nil)))))
+		       (make-hash-table :test #'eq :weak-keys t :values nil)))))
     (setf (gethash process *allegro-process-table*) nil
 	  (gethash process tab) process)))
 
@@ -117,8 +117,8 @@ for later perusal."
      :do (let ((process (find-process-for-pid pid)))
 	   (setf (allegro-process-reap-result process)
 		 (if sig
-		     (list :SIGNALED sig)
-		     (list :EXITED status)))
+		     (list :signaled sig)
+		     (list :exited status)))
 	   (remhash process *allegro-unreaped-processes*))))
 
 (defmethod start (program args
@@ -137,25 +137,25 @@ for later perusal."
 	     (not (probe-file #p"/dev/null")))
     (error "Cannot suppress output on this system."))
   (let* ((in (cond
-	     ;; NIL and T are different on allegro
-	     ((eq NIL input) (make-string-input-stream ""))
-	     ((eq T input) nil)
-	     (T input)))
+	     ;; nil and t are different on allegro
+	     ((eq nil input) (make-string-input-stream ""))
+	     ((eq t input) nil)
+	     (t input)))
 	 (out (cond
-	     ;; NIL and T are different on allegro
-	     ((eq NIL output) (open #p"/dev/null" :direction :output :if-exists :supersede))
-	     ((eq T input) nil)
-	     (T input)))
+	     ;; nil and t are different on allegro
+	     ((eq nil output) (open #p"/dev/null" :direction :output :if-exists :supersede))
+	     ((eq t input) nil)
+	     (t input)))
 	 (err (cond
-	     ;; NIL and T are different on allegro
-	     ((eq NIL input) (open #p"/dev/null" :direction :output :if-exists :supersede))
-	     ((eq T input) nil)
-	     ((eq :OUTPUT output) out)
-	     (T input))))
+	     ;; nil and t are different on allegro
+	     ((eq nil input) (open #p"/dev/null" :direction :output :if-exists :supersede))
+	     ((eq t input) nil)
+	     ((eq :output output) out)
+	     (t input))))
     (multiple-value-bind (instream outstream errstream pid)
 	(excl:run-shell-command
 	 (format nil "~A~{~^ ~A~}" program args)
-	 :wait nil :separate-streams T
+	 :wait nil :separate-streams t
 	 :input in :output out :error-output err
 	 :if-input-does-not-exist if-input-does-not-exist
 	 :if-output-exists if-output-exists
@@ -168,7 +168,7 @@ for later perusal."
 	process))))
 
 (defmethod process-p ((process allegro-process))
-  T)
+  t)
 
 (defmethod signal-process (process (signal symbol))
   (let ((sig (assoc signal *signal-mapping*)))
@@ -196,5 +196,5 @@ for later perusal."
   ;; ok, check on process now
   (if (allegro-process-reap-result process)
       (apply #'values (allegro-process-reap-result process))
-      (values :RUNNING)))
+      (values :running)))
 
