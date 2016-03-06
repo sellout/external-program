@@ -76,5 +76,8 @@
 (defmethod process-status (process)
   (values (sb-ext:process-status process) (sb-ext:process-exit-code process)))
 
+(defmethod process-id (process)
+  (sb-ext:process-pid process))
+
 (defmethod process-p (process)
   (sb-ext:process-p process))
