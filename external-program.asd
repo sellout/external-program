@@ -22,11 +22,12 @@
                       ;; #+liquid "liquid"
                       #+lispworks "lispworks"
                       ;; #+lucid "lucid"
+                      #+mkcl "mkcl"
                       #+openmcl "openmcl"
                       #+sbcl "sbcl"
                       ;; #+scl "scieneer"
-                      #-(or allegro armedbear clisp cmu ecl lispworks openmcl
-                            sbcl)
+                      #-(or allegro armedbear clisp cmu ecl lispworks mkcl
+                            openmcl sbcl)
                       "unsupported"
                       :depends-on ("utilities")))
   :in-order-to ((test-op (load-op external-program-test)))
