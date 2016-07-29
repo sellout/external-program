@@ -3,13 +3,14 @@
 
 (in-package :external-program)
 
-;;; Outdated docs in http://ecls.sourceforge.net/new-manual/re11.html, but code
-;;; is in ecl/src/c/unixsys.d
+;;; Docs in https://common-lisp.net/project/ecl/manual/rn01.html
+;;; Code is in ecl/src/c/unixsys.d
 
 (defstruct external-process
   inputp
   outputp
-  stream)
+  stream
+  process)
 
 (defmethod run
     (program args
@@ -36,14 +37,17 @@
       (error "ECL can not create a stream for error output."))
   (multiple-value-bind (program args)
       (embed-environment program args environment replace-environment-p)
-    (make-external-process :inputp (eq input :stream)
-                           :outputp (eq output :stream)
-                           :stream (ext:run-program program
-                                                    (stringify-args args)
-                                                    :wait nil
-                                                    :input input
-                                                    :output output
-                                                    :error error))))
+    (multiple-value-bind (stream return-value process)
+        (ext:run-program program (stringify-args args)
+                         :wait nil
+                         :input input
+                         :output output
+                         :error error)
+      (declare (ignore return-value))
+      (make-external-process :inputp (eq input :stream)
+                             :outputp (eq output :stream)
+                             :stream stream
+                             :process process))))
 
 (defmethod process-input-stream ((process external-process))
   (if (external-process-inputp process)
@@ -57,6 +61,12 @@
   (declare (ignore process))
   nil)
 
+(defmethod process-id ((process external-process))
+  (ext:external-process-pid (external-process-process process)))
+
 (defmethod process-p ((process external-process))
   (declare (ignore process))
   t)
+
+(defmethod process-status ((process external-process))
+  (ext:external-process-status (external-process-process process)))
