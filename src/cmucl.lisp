@@ -50,3 +50,6 @@
 
 (defmethod process-p (process)
   (ext:process-p process))
+
+(defmethod wait-for-process (process)
+  (ext:process-wait process))
