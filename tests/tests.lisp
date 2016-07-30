@@ -70,3 +70,12 @@
       (sleep 5)
       (let ((status-2 (external-program:process-status process)))
         (is (eq :exited status-2))))))
+
+(test signal-async
+  (let ((process (external-program:start "sleep" '("3"))))
+    (let ((status-1 (external-program:process-status process)))
+      (is (eq :running status-1))
+      (external-program:signal-process process 9)
+      (sleep 1)
+      (let ((status-2 (external-program:process-status process)))
+        (is-false (eq :running status-2))))))
