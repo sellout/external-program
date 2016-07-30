@@ -6,7 +6,7 @@
   (:export #:start #:run #:signal-process
 	   #:process-id #:process-input-stream
 	   #:process-output-stream #:process-error-stream
-	   #:process-status #:process-p)
+	   #:process-status #:process-p #:wait-for-process)
   (:documentation ""))
 
 (in-package :external-program)
@@ -146,6 +146,14 @@ the process changes. The function takes the process as an argument.")
   (:method (process)
     (declare (ignore process))
     nil))
+
+(defgeneric wait-for-process (process)
+  (:documentation "Wait for asynchronously launched process to exit.")
+  (:method (process)
+    (if (process-p process)
+        (error "This CL implementation does not support WAIT-FOR-PROCESS.")
+        (error "Incorrect argument type (~a) for WAIT-FOR-PROCESS."
+               (type-of process)))))
 
 (defvar *signal-mapping*
   '((:hangup . 1)

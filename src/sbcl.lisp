@@ -81,3 +81,6 @@
 
 (defmethod process-p (process)
   (sb-ext:process-p process))
+
+(defmethod wait-for-process (process)
+  (sb-ext:process-wait process))

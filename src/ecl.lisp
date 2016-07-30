@@ -60,3 +60,6 @@
 (defmethod process-p ((process external-process))
   (declare (ignore process))
   t)
+
+(defmethod wait-for-process ((process external-process))
+  (ext:external-process-wait (external-process-process process) t))

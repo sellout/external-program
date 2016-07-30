@@ -49,3 +49,6 @@
 
 (defmethod process-p ((process ccl:external-process))
   t)
+
+(defmethod wait-for-process (process)
+  (ccl::external-process-wait process))
