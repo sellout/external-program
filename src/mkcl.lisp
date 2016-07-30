@@ -68,3 +68,6 @@
 
 (defmethod process-status ((process external-process))
   (mk-ext:process-status (external-process-process process)))
+
+(defmethod wait-for-process ((process external-process))
+  (mk-ext:join-process (external-process-process process)))
