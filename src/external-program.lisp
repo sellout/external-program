@@ -44,7 +44,7 @@ extend the environment).
 
 `STATUS-HOOK` is a function the system calls whenever the status of
 the process changes. The function takes the process as an argument.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (program args &rest rest)
     (declare (ignore program args rest))
     (error "This CL implementation does not support START."))
@@ -66,7 +66,7 @@ the process changes. The function takes the process as an argument.")
 `:STREAM` is not a valid argument to `INPUT`, `OUTPUT`, or `ERROR` for this function.")
   (:method ((program pathname) args &rest rest)
     (apply #'run (namestring program) args rest))
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (program args &rest rest)
     (let ((process (apply #'start program args rest)))
       (do ((status (process-status process) (process-status process)))
@@ -88,6 +88,7 @@ the process changes. The function takes the process as an argument.")
   external process. Signals an error if unsuccessful. The signal may
   be either an integer, or one of the keywords in
   `EXTERNAL-PROGRAM::*SIGNAL-MAPPING*`.")
+  #-cmu
   (:method (process signal)
     (declare (ignore signal))
     (if (process-p process)
@@ -99,7 +100,7 @@ the process changes. The function takes the process as an argument.")
   (:documentation "Returns the process id assigned to the external
   process by the operating system. This is typically a positive,
   16-bit number.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (process)
     (if (process-p process)
         (error "This CL implementation does not support PROCESS-ID.")
@@ -109,7 +110,7 @@ the process changes. The function takes the process as an argument.")
 (defgeneric process-input-stream (process)
   (:documentation "Returns the stream created when the input argument
   to `START` is specified as `:STREAM`.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (process)
     (if (process-p process)
         (error "This CL implementation does not support PROCESS-INPUT-STREAM.")
@@ -119,7 +120,7 @@ the process changes. The function takes the process as an argument.")
 (defgeneric process-output-stream (process)
   (:documentation "Returns the stream created when the output argument
   to `START` is specified as `:STREAM`.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (process)
     (if (process-p process)
         (error "This CL implementation does not support PROCESS-OUTPUT-STREAM.")
@@ -129,7 +130,7 @@ the process changes. The function takes the process as an argument.")
 (defgeneric process-error-stream (process)
   (:documentation "Returns the stream created when the error argument
   to `START` is specified as `:STREAM`.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (process)
     (if (process-p process)
         (error "This CL implementation does not support PROCESS-ERROR-STREAM.")
@@ -141,7 +142,7 @@ the process changes. The function takes the process as an argument.")
   status of the external process (one of `:RUNNING`, `:STOPPED`,
   `:SIGNALED`, or `:EXITED`), and the exit code or terminating signal
   if the first value is other than `:RUNNING`.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (process)
     (if (process-p process)
         (error "This CL implementation does not support PROCESS-STATUS.")
@@ -150,7 +151,7 @@ the process changes. The function takes the process as an argument.")
 
 (defgeneric process-p (process)
   (:documentation "`T` if object is a process, `NIL` otherwise.")
-  #-sbcl
+  #-(or cmu sbcl)
   (:method (process)
     (declare (ignore process))
     nil))
