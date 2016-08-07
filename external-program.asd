@@ -10,6 +10,7 @@
   :author "Greg Pfeil <greg@technomadic.org>"
   :licence "LLGPL"
   :version "0.0.6"
+  :depends-on (trivial-features)
   :pathname "src/"
   :components ((:file "external-program")
                (:file "utilities" :depends-on ("external-program"))
