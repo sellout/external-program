@@ -11,10 +11,11 @@
     (warn "No environment control in SBCL on Windows.")
     (remf rest :environment))
   #-windows
-  (let ((env (reformat-environment environment)))
+  (let ((env (mapcar (lambda (var) (format nil "~a=~a" (car var) (cdr var)))
+                     environment)))
     (setf (getf rest :environment)
           (if replace-environment-p
-              (append env '("PATH=''"))
+              (append env '("PATH="))
               (append env (sb-ext:posix-environ)))))
   (remf rest :replace-environment-p)
   rest)
